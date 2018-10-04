@@ -68,3 +68,61 @@ Returns the date. Useful for checking service availability
 **URL** : `/healthcheck`
 
 **Method** : `GET`
+
+
+
+## Classes
+
+### Student
+
+| Name  | Datatype | Example
+| ------------- | ------------- | ------------- |
+| lastname  | string  |
+| firstname  | string  |
+| isUndergraduate | boolean |
+| CWID | integer | 20043823 |
+| GPA | double | 3.75 |
+| grade | string | Junior |
+| academicYear | string | 2015-2016 |
+| school | string | Computer Science & Mathematics |
+| majors | List of strings |
+| minors | List of strings |
+| advisor | `Advisor` | [See `Advisor`] |
+| degreeProgress | `DegreeProgress` | [See `DegreeProgress`] |
+| requirements | `Requirements` | [See `Requirements`] |
+
+### Advisor
+
+| Name  | Datatype |
+| ------------- | ------------- |
+| lastname | string |
+| firstname | string |
+
+### DegreeProgress
+
+| Name  | Datatype |
+| ------------- | ------------- |
+| requirementsPercent | integer |
+| creditsPercent | integer |
+| creditsRequired | integer |
+| creditsApplied | integer |
+
+### Requirements
+All properties are of type `Status` (see below)
+
+| Name  | Notes
+| ------------- | ------------- |
+| isLast30Credits | Last 30 Credits At Marist |
+| hasMinLibArts | Mimimum Liberal Art Credits |
+| hasMinCredits | Minimum Degree Credits |
+| hasMinGPA | Minimum GPA |
+| has20GPA | 2.0 GPA Requirement |
+| hasFoundation | Foundation |
+| hasBreadth | Distribution: Breadth |
+| hasPathway | Distribution: Pathway |
+| hasSkill | Skill Requirement |
+| hasMajor | Major Requirements |
+
+### Status (Java Enum)
+Constants: `COMPLETE`, `INCOMPLETE`, `IN_PROGRESS`
+
