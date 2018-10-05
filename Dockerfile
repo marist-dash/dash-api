@@ -1,10 +1,7 @@
-FROM maven:3.5.2-jdk-8-alpine AS MAVEN_TOOL_CHAIN
-COPY pom.xml /tmp/
-COPY src /tmp/src/
-WORKDIR /tmp/
-RUN mvn package
-
+# Development
 FROM openjdk:8-jdk-alpine
+VOLUME /tmp
 EXPOSE 8080
-COPY --from=MAVEN_TOOL_CHAIN /tmp/target/dash-api-0.1.0.jar dash-api-0.1.0.jar
-ENTRYPOINT ["java", "-jar", "dash-api-0.1.0.jar"]
+ARG JAR_FILE=target/dash-parse-0.1.0.jar
+ADD ${JAR_FILE} app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

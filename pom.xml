@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.springframework</groupId>
-    <artifactId>dash-api</artifactId>
+    <artifactId>dash-parse</artifactId>
     <version>0.1.0</version>
 
     <parent>
@@ -56,5 +56,5 @@
             </plugin>
         </plugins>
     </build>
-    <name>dash-api</name>
+    <name>dash-parse</name>
 </project>
