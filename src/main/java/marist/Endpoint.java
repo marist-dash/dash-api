@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class Endpoint {
 
-  @RequestMapping("/healthcheck")
-  public String doHealthCheck() {
-    return new Date().toString();
-  }
-
-  @RequestMapping(method = RequestMethod.POST, value = "/upload")
+  @RequestMapping(method = RequestMethod.POST, value = "/")
   public Student uploadText(@RequestParam String degreeWorksText) {
     DegreeWorksParser degreeWorksParser = new DegreeWorksParser(degreeWorksText);
     Student student = degreeWorksParser.extractStudentInfo();
     return student;
+  }
+
+  @RequestMapping("/healthcheck")
+  public String doHealthCheck() {
+    return new Date().toString();
   }
 }

@@ -11,9 +11,10 @@ public class Requirements {
   public Status hasBreadth;
   public Status hasPathway;
   public Status hasSkill;
+  public Status hasHonors;
   public Status hasMajor;
 
   public enum Status {
-    COMPLETE, INCOMPLETE, IN_PROGRESS
+    COMPLETE, INCOMPLETE, IN_PROGRESS, NA
   }
 }

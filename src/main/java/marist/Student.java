@@ -1,5 +1,6 @@
 package marist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Student {
@@ -10,17 +11,19 @@ public class Student {
   public int CWID;
   public String grade;
   public String school;
-  public Advisor advisor;
+  public List<Advisor> advisors;
   public List<String> majors;
   public double GPA;
   public List<String> minors;
   public DegreeProgress degreeProgress;
   public String academicYear;
   public Requirements requirements;
+  public InProgress inProgress;
 
   public Student() {
-    this.advisor = new Advisor();
+    this.advisors = new ArrayList<>();
     this.degreeProgress = new DegreeProgress();
     this.requirements = new Requirements();
+    this.inProgress = new InProgress();
   }
 }
