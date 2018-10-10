@@ -7,6 +7,7 @@ WORKDIR /tmp/
 RUN mvn package
 
 FROM openjdk:8-jdk-alpine
-EXPOSE 8080
+EXPOSE 8081
+COPY --from=MAVEN_TOOL_CHAIN /tmp/application.properties application.properties
 COPY --from=MAVEN_TOOL_CHAIN /tmp/target/dash-parse-0.1.0.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
