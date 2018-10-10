@@ -3,7 +3,7 @@ package marist;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
+import marist.Requirements.Status;
 
 public class DegreeWorksParser {
 
@@ -16,24 +16,26 @@ public class DegreeWorksParser {
     this.degreeWorksText = degreeWorksText;
   }
 
-  public Student extractStudentInfo() {
-    Scanner scanner = new Scanner(this.degreeWorksText);
-    String currentLine;
+  private void initReport() {
+    String[] lines = this.degreeWorksText.split("\\\n");
     String[] wordsInLine;
-    while (scanner.hasNextLine()) {
-      currentLine = scanner.nextLine();
-      wordsInLine = currentLine.split("\\s+");
-      // ignore arrays of size 0 to prevent ArrayIndexOutOfBoundsException           
+    for (String line : lines) {
+      wordsInLine = line.split("\\s+");
+      // ignore empty lines
       if (wordsInLine.length > 0) {
         if (wordsInLine.length == 1 && wordsInLine[0].length() == 0) {
-          // ignore lines with nothing in them
+          // ignore lines consisting of one space
         } else {
           report.add(wordsInLine);
         }
       }
     }
+  }
 
-    advanceUntil("Student", 0);
+  public Student extractStudentInfo() {
+    initReport();
+
+    advanceUntil("Student");
     // Student name and [Undergraduate | Graduate]
     student.lastName = removeLastChar(report.get(currLine)[1]);
     student.firstName = report.get(currLine)[2];
@@ -62,25 +64,23 @@ public class DegreeWorksParser {
     // don't enumerate currLine, already done in getMajorsMinors()
 
     // Degree Requirements %
-    advanceUntil("Requirements", 0);
-    String requirementsPercent = removeLastChar(report.get(currLine)[0]);
-    student.degreeProgress.requirementsPercent = Integer.valueOf(requirementsPercent);
+    advanceUntil("Requirements");
+    student.degreeProgress.requirementsPercent = Integer.valueOf(removeLastChar(report.get(currLine)[0]));
 
     // Degree Credits %
-    advanceUntil("Credits", 0);
+    advanceUntil("Credits");
 
-    String creditsPercent = removeLastChar(report.get(currLine)[0]);
-    student.degreeProgress.creditsPercent = Integer.valueOf(creditsPercent);
+    student.degreeProgress.creditsPercent = Integer.valueOf(removeLastChar(report.get(currLine)[0]));
 
     // Academic Year
-    advanceUntil("Not", 0);
+    advanceUntil("Degree");
     student.academicYear = findNextProperty("Year:", 0);
 
     // Degree Credits Required
     student.degreeProgress.creditsRequired = Integer.valueOf(findNextProperty("Required:", 2));
 
     // Credits Applied
-    advanceUntil("Academic", 0);
+    advanceUntil("Academic");
     student.degreeProgress.creditsApplied = Integer.valueOf(findNextProperty("Applied:", 0));
 
     // Requirements
@@ -115,25 +115,34 @@ public class DegreeWorksParser {
     return report.get(currLine)[++wordIndex];
   }
 
-  private void advanceUntil(String targetWord, int targetIndex) {
-    while (!report.get(currLine)[targetIndex].equals(targetWord)) {
+  private void advanceUntil(String targetWord) {
+    while (!report.get(currLine)[0].equals(targetWord)) {
       currLine++;
     }
     currLine++;
   }
 
-  private Requirements.Status checkStatus() {
-    if (report.get(currLine)[0].equals("Complete")) {
-      if (report.get(currLine)[1].equals("except")) {
+  private void advanceUntil(String targetWord, int targetIndex) {
+    while (true) {
+      if (report.get(currLine).length - 1 < targetIndex) {
         currLine++;
-        return Requirements.Status.IN_PROGRESS;
       } else {
-        currLine++;
-        return Requirements.Status.COMPLETE;
+        if (report.get(currLine)[targetIndex].equals(targetWord)) {
+          currLine++;
+          return;
+        }
       }
+      currLine++;
+    }
+  }
+
+  private Status checkStatus() {
+    if (report.get(currLine + 1)[0].equals("Still")) {
+      currLine += 2;
+      return Status.INCOMPLETE;
     } else {
-      currLine = currLine + 2;
-      return Requirements.Status.INCOMPLETE;
+      currLine++;
+      return Status.COMPLETE;
     }
   }
 
