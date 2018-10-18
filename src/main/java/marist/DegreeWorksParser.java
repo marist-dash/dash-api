@@ -177,6 +177,12 @@ public class DegreeWorksParser {
         sb.append(report.get(currLine)[wordIndex]).append(" ");
         wordIndex++;
       }
+      
+      // check for no minor
+      if (sb.length() == 0) {
+        return majors;
+      }
+      
       sb.setLength(sb.length() - 1);
       majors.add(sb.toString());
       wordIndex = 0;
