@@ -260,9 +260,10 @@ public class DegreeWorksParser {
 
       // semester
       course.semester = report.get(currLine)[wordIndex];
+      wordIndex++;
 
       // year
-      course.semester = report.get(currLine)[wordIndex];
+      course.year = Integer.parseInt(report.get(currLine)[wordIndex]);
 
       student.inProgress.courses.add(course);
       currLine++;
