@@ -12,9 +12,9 @@ public class Student {
   public String grade;
   public String school;
   public List<Advisor> advisors;
-  public List<String> majors;
+  public List<Study> majors;
   public double GPA;
-  public List<String> minors;
+  public List<Study> minors;
   public DegreeProgress degreeProgress;
   public String academicYear;
   public Requirements requirements;

@@ -36,6 +36,8 @@ public class DegreeWorksParser {
     initReport();
 
     advanceUntil("Student");
+    currLine++;
+
     // Student name and [Undergraduate | Graduate]
     student.lastName = removeLastChar(report.get(currLine)[1]);
     student.firstName = report.get(currLine)[2];
@@ -55,25 +57,28 @@ public class DegreeWorksParser {
     student.advisors = getAdvisors();
 
     // Major(s)
-    student.majors = getMajorsMinors("Major", "Overall");
-    // don't enumerate currLine, already done in getMajorsMinors()
+    student.majors = getStudies("Major", "Overall");
+    // don't enumerate currLine, already done in getMajorsMistudent.majors = nors()
 
-    // GPA and Minor(s)
+    // GPA
     student.GPA = Double.parseDouble(report.get(currLine)[2]);
-    student.minors = getMajorsMinors("Minor", "Student");
-    // don't enumerate currLine, already done in getMajorsMinors()
+
+    // Minor(s)
+    student.minors = getStudies("Minor", "Student");
 
     // Degree Requirements %
     advanceUntil("Requirements");
+    currLine++;
     student.degreeProgress.requirementsPercent = Integer.valueOf(removeLastChar(report.get(currLine)[0]));
 
     // Degree Credits %
     advanceUntil("Credits");
-
+    currLine++;
     student.degreeProgress.creditsPercent = Integer.valueOf(removeLastChar(report.get(currLine)[0]));
 
     // Academic Year
     advanceUntil("Degree");
+    currLine++;
     student.academicYear = findNextProperty("Year:", 0);
 
     // Degree Credits Required
@@ -81,6 +86,7 @@ public class DegreeWorksParser {
 
     // Credits Applied
     advanceUntil("Academic");
+    currLine++;
     student.degreeProgress.creditsApplied = Integer.valueOf(findNextProperty("Applied:", 0));
 
     // Requirements
@@ -101,6 +107,9 @@ public class DegreeWorksParser {
     }
     student.requirements.hasMajor = checkStatus();
 
+    // get credits applied/required for each major and minor
+    updateStudies();
+
     // get classes in progress
     getInProgress();
 
@@ -115,13 +124,25 @@ public class DegreeWorksParser {
     return report.get(currLine)[++wordIndex];
   }
 
+  /**
+   * Advances lines in the DegreeWorks report until the target word is found at
+   * the first word in a line.
+   *
+   * @param targetWord
+   */
   private void advanceUntil(String targetWord) {
     while (!report.get(currLine)[0].equals(targetWord)) {
       currLine++;
     }
-    currLine++;
   }
 
+  /**
+   * Advances lines in the DegreeWorks report until the target word is found at
+   * the specified target index.
+   *
+   * @param targetWord
+   * @param targetIndex
+   */
   private void advanceUntil(String targetWord, int targetIndex) {
     while (true) {
       if (report.get(currLine).length - 1 < targetIndex) {
@@ -162,8 +183,8 @@ public class DegreeWorksParser {
     return schoolName.toString();
   }
 
-  private List<String> getMajorsMinors(String majorOrMinor, String targetWord) {
-    List<String> majors = new LinkedList<>();
+  private List<Study> getStudies(String majorOrMinor, String targetWord) {
+    List<Study> studies = new LinkedList<>();
     int wordIndex = 0;
     while (!report.get(currLine)[wordIndex].contains(majorOrMinor)) {
       wordIndex++;
@@ -177,26 +198,28 @@ public class DegreeWorksParser {
         sb.append(report.get(currLine)[wordIndex]).append(" ");
         wordIndex++;
       }
-      
-      // check for no minor
+
+      // check if there is no minor
       if (sb.length() == 0) {
-        return majors;
+        return studies;
       }
-      
+
       sb.setLength(sb.length() - 1);
-      majors.add(sb.toString());
+      Study study = new Study();
+      study.name = sb.toString();
+      studies.add(study);
       wordIndex = 0;
       currLine++;
     } while (!report.get(currLine)[0].equals(targetWord));
 
-    return majors;
+    return studies;
   }
 
   private List<Advisor> getAdvisors() {
     List<Advisor> advisors = new ArrayList<>();
     Advisor advisor = new Advisor();
-    advisor.lastname = removeLastChar(report.get(currLine)[1]);
-    advisor.firstname = report.get(currLine)[2];
+    advisor.lastName = removeLastChar(report.get(currLine)[1]);
+    advisor.firstName = report.get(currLine)[2];
     advisors.add(advisor);
 
     // check if student has one advisor
@@ -215,8 +238,8 @@ public class DegreeWorksParser {
         }
       }
       advisor = new Advisor();
-      advisor.lastname = removeLastChar(report.get(currLine)[0]);
-      advisor.firstname = report.get(currLine)[1];
+      advisor.lastName = removeLastChar(report.get(currLine)[0]);
+      advisor.firstName = report.get(currLine)[1];
       advisors.add(advisor);
     }
     return advisors;
@@ -229,6 +252,50 @@ public class DegreeWorksParser {
       }
     }
     return false;
+  }
+
+  private void updateStudies() {
+    // Majors
+
+    student.majors.forEach((study) -> {
+      advanceUntil("Major");
+      currLine += 2;
+      study.GPA = Double.parseDouble(report.get(currLine)[1]);
+
+      // attempt to get credits required/applied
+      // may not be possible if student has two majors
+
+      // search next ten lines for "Academic" at position 0
+      int lineToStopAt = currLine + 10;
+      while (currLine < lineToStopAt) {
+        if (report.get(currLine)[0].equals("Academic")) {
+          // check if line format is like: "Academic Year: 2015-2016 Credits Required: 67"
+          if (report.get(currLine).length == 6) {
+            // credits required/applied values are located in last index of array
+            int lineLength = report.get(currLine).length;
+            study.creditsRequired = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+            currLine++;
+            lineLength = report.get(currLine).length;
+            study.creditsApplied = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+            return;
+          }
+        } else {
+          currLine++;
+        }
+      }
+    });
+
+    // Minors
+    student.minors.forEach((study) -> {
+      advanceUntil("Minor");
+      currLine++;
+      int lastIndex = 5;
+      study.creditsRequired = Integer.parseInt(report.get(currLine)[lastIndex]);
+      currLine++;
+      study.GPA = Double.parseDouble(report.get(currLine)[1]);
+      lastIndex = 4;
+      study.creditsApplied = Integer.parseInt(report.get(currLine)[lastIndex]);
+    });
   }
 
   private void getInProgress() {
