@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.production
     image: dash-parse:0.1.0
+    retart: always
     ports:
       - "8081:8081"
     networks:
