@@ -113,3 +113,6 @@ All properties are of type `Status` (see below)
 | hasSkill | Skill Requirement |
 | hasMajor | Major Requirements |
 | hasHonors | Honors Student (Status for non-honors students is `NA`) |
+
+### Status (enum)
+`COMPLETE`, `INCOMPLETE`, `NA`
