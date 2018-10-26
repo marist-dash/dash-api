@@ -6,6 +6,12 @@ services:
       dockerfile: Dockerfile.production
     image: dash-parse:0.1.0
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8081"
+      - "traefik.frontend.rule=Host:dash-parse.maristdash.tk
+      - "traefik.docker.network=dash-net"
+      - "traefik.backend=dash-parse"
     ports:
       - "8081:8081"
     networks:
