@@ -13,7 +13,7 @@ Exposes a REST endpoint for parsing DegreeWorks text
 
 ### Parse DegreeWorks text
 
-**URL**: `/upload`
+**URL**: `/`
 
 **Method**: `POST`
 
