@@ -10,6 +10,12 @@ services:
       - "8081:8081"
     networks:
       - dash-net
+    labels:
+      - "traefik.docker.network=dash-net"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:dash-parse.dev-maristdash.tk"
+      - "traefik.port=8081"
+      - "traefik.backend=dash-parse"
 networks:
   dash-net:
     external: true
