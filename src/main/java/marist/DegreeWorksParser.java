@@ -257,31 +257,64 @@ public class DegreeWorksParser {
   private void updateStudies() {
     // Majors
 
+    // there are two ways the major details are displayed
+    // option A
+    /*
+    Major in Computer Science
+    Academic Year:   2015-2016
+    GPA:   3.952
+    A CONCENTRATION IS REQUIRED FOR THIS MAJOR 
+    Software Development Concentration
+    Concentration in Software Development
+    Academic Year:   2015-2016 Credits Required:   67
+    Credits Applied:   67
+     */
+    // option B
+    /*
+    Major in Information Technology and Systems
+    Academic Year:   2017-2018 Credits Required:   73
+    GPA:   3.508 Credits Applied:   75
+     */
     student.majors.forEach((study) -> {
       advanceUntil("Major");
-      currLine += 2;
-      study.GPA = Double.parseDouble(report.get(currLine)[1]);
+      currLine++;
 
-      // attempt to get credits required/applied
-      // may not be possible if student has two majors
+      // check for option A
+      if (report.get(currLine).length == 3) {
+        currLine++;
+        study.GPA = Double.parseDouble(report.get(currLine)[1]);
+        // attempt to get credits required/applied one or many lines down
+        // may not be possible if student has two majors
 
-      // search next ten lines for "Academic" at position 0
-      int lineToStopAt = currLine + 10;
-      while (currLine < lineToStopAt) {
-        if (report.get(currLine)[0].equals("Academic")) {
-          // check if line format is like: "Academic Year: 2015-2016 Credits Required: 67"
-          if (report.get(currLine).length == 6) {
-            // credits required/applied values are located in last index of array
-            int lineLength = report.get(currLine).length;
-            study.creditsRequired = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+        // search next ten lines for "Academic" at position 0
+        int lineToStopAt = currLine + 10;
+        while (currLine < lineToStopAt) {
+          if (report.get(currLine)[0].equals("Academic")) {
+            // check if line format is like: "Academic Year: 2015-2016 Credits Required: 67"
+            if (report.get(currLine).length == 6) {
+              // credits required/applied values are located in last index of array
+              int lineLength = report.get(currLine).length;
+              study.creditsRequired = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+              currLine++;
+              lineLength = report.get(currLine).length;
+              study.creditsApplied = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+              return;
+            }
+          } else {
             currLine++;
-            lineLength = report.get(currLine).length;
-            study.creditsApplied = Integer.parseInt(report.get(currLine)[lineLength - 1]);
-            return;
           }
-        } else {
-          currLine++;
         }
+      } else {
+        // must be option B
+
+        // credits required/applied values are located in last index of array
+        int lineLength = report.get(currLine).length;
+        study.creditsRequired = Integer.parseInt(report.get(currLine)[lineLength - 1]);
+        currLine++;
+
+        study.GPA = Double.parseDouble(report.get(currLine)[1]);
+        lineLength = report.get(currLine).length;
+        study.creditsApplied = Integer.parseInt(report.get(currLine)[lineLength - 1]);
       }
     });
 
@@ -302,8 +335,8 @@ public class DegreeWorksParser {
     advanceUntil("In-progress", 1);
     student.inProgress.numCredits = Integer.parseInt(report.get(currLine)[2]);
     int numClasses = student.inProgress.numClasses = Integer.parseInt(report.get(currLine)[5]);
-    int endIndex = currLine + numClasses;
     currLine++;
+    int endIndex = currLine + numClasses;
     while (currLine < endIndex) {
       Course course = new Course();
       course.dept = report.get(currLine)[0];

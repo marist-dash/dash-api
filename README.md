@@ -3,14 +3,17 @@ Exposes a REST endpoint for parsing DegreeWorks text
 
 ## Instructions
 1) Create the Dash network (if not created already) `docker network create dash-net`
-2) Build and start the service `docker-compose up -d`
-    * Just build: `docker build -t dash-api:0.1.0 .`
+2) Building the image and starting the service
+    - Development: `mvn clean package`, `docker-compose up -d`
+        - To rebuild the image: `docker-compose up -d --build`
+    - Production: `docker-compose -f production.yml up -d`
+        - To rebuild the image: `docker-compose -f production.yml up -d --build`
 
 ## Endpoints
 
 ### Parse DegreeWorks text
 
-**URL**: `/upload`
+**URL**: `/`
 
 **Method**: `POST`
 
@@ -34,12 +37,21 @@ Exposes a REST endpoint for parsing DegreeWorks text
         "lastname": "Hamilton"
     },
     "majors": [
-        "Computer Science"
+        {
+            "name": "Computer Science",
+            "GPA": 3.22,
+            "creditsRequired": 67,
+            "creditsApplied": 53
+        }
     ],
     "GPA": 3.593,
     "minors": [
-        "Cybersecurity",
-        "Information Systems"
+        {
+            "name": "Information Technology",
+            "GPA": 3.05,
+            "creditsRequired": 23,
+            "creditsApplied": 18
+        }
     ],
     "degreeProgress": {
         "requirementsPercent": 97,
@@ -58,7 +70,8 @@ Exposes a REST endpoint for parsing DegreeWorks text
         "hasBreadth": "IN_PROGRESS",
         "hasPathway": "COMPLETE",
         "hasSkill": "COMPLETE",
-        "hasMajor": "INCOMPLETE"
+        "hasMajor": "INCOMPLETE",
+        "hasHonors": "NA"
     }
 }
 ```
@@ -73,39 +86,16 @@ Returns the date. Useful for checking service availability
 
 ## Classes
 
-### Student
-
-| Name  | Datatype | Example
-| ------------- | ------------- | ------------- |
-| lastname  | string  |
-| firstname  | string  |
-| isUndergraduate | boolean |
-| CWID | integer | 20043823 |
-| GPA | double | 3.75 |
-| grade | string | Junior |
-| academicYear | string | 2015-2016 |
-| school | string | Computer Science & Mathematics |
-| majors | List of strings |
-| minors | List of strings |
-| advisor | `Advisor` | [See `Advisor`] |
-| degreeProgress | `DegreeProgress` | [See `DegreeProgress`] |
-| requirements | `Requirements` | [See `Requirements`] |
-
-### Advisor
-
-| Name  | Datatype |
-| ------------- | ------------- |
-| lastname | string |
-| firstname | string |
-
-### DegreeProgress
-
-| Name  | Datatype |
-| ------------- | ------------- |
-| requirementsPercent | integer |
-| creditsPercent | integer |
-| creditsRequired | integer |
-| creditsApplied | integer |
+| Name | Notes | Link |
+| ---- | ------- | ---- |
+| Advisor | A student has one or many advisors | [Advisor.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/Advisor.java) |
+| Course | Represents a class taken by a student | [Course.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/Course.java) | 
+| DegreeProgress | Numerical representation of student's progress towards graduation | [DegreeProgress.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/DegreeProgress.java) | 
+| DegreeWorksParser | Extracts relavant information from a DegreeWorks report and populates all other objects | [DegreeWorksParser.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/DegreeWorksParser.java) | 
+| InProgress | A list of type `Course` | [InProgress.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/InProgress.java)| 
+| Requirements | Object representing student's requirements for graduation | [Requirements.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/Requirements.java) | 
+| Student | Represents a student and his/her DegreeWorks report  | [Student.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/Student.java) | 
+| Study | Represents a major or minor | [Study.java](https://github.com/marist-dash/dash-parse/blob/master/src/main/java/marist/Study.java) |
 
 ### Requirements
 All properties are of type `Status` (see below)
@@ -122,7 +112,7 @@ All properties are of type `Status` (see below)
 | hasPathway | Distribution: Pathway |
 | hasSkill | Skill Requirement |
 | hasMajor | Major Requirements |
+| hasHonors | Honors Student (Status for non-honors students is `NA`) |
 
-### Status (Java Enum)
-Constants: `COMPLETE`, `INCOMPLETE`, `IN_PROGRESS`
-
+### Status (enum)
+`COMPLETE`, `INCOMPLETE`, `NA`
