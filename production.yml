@@ -1,17 +1,11 @@
 version: '3'
 services:
-  api:
+  dash-parse:
+    image: dash-parse:0.1.0
     build:
       context: .
       dockerfile: Dockerfile.production
-    image: dash-parse:0.1.0
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=8081"
-      - "traefik.frontend.rule=Host:dash-parse.maristdash.tk"
-      - "traefik.docker.network=dash-net"
-      - "traefik.backend=dash-parse"
     ports:
       - "8081:8081"
     networks:
@@ -19,7 +13,7 @@ services:
     labels:
       - "traefik.docker.network=dash-net"
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:dash-parse.dev-maristdash.tk"
+      - "traefik.frontend.rule=Host:dash-parse.speedegree.tk"
       - "traefik.port=8081"
       - "traefik.backend=dash-parse"
 networks:
