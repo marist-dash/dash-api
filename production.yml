@@ -13,7 +13,7 @@ services:
     labels:
       - "traefik.docker.network=dash-net"
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:dash-parse.speedegree.tk"
+      - "traefik.frontend.rule=PathPrefixStrip:/dash-parse"
       - "traefik.port=8081"
       - "traefik.backend=dash-parse"
 networks:
